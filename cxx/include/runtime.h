@@ -39,9 +39,7 @@ namespace neuronx_rs::runtime {
     // Returns NRT status code (0 for success)
     uint32_t neuronx_close() {return static_cast<uint32_t>(nrt_close());}
     // Get the version of the neuron runtime
-    unique_ptr<NrtVersion> neuronx_version() {
-        return uniqe_ptr<NrtVersion>(new NrtVersion());
-    }
+    unique_ptr<NrtVersion> neuronx_version() {return Version::get();}
     // Get the number of neuron cores on this hardware
     uint32_t get_nc_count() {
         uint32_t count{0};
