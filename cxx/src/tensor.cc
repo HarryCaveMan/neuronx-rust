@@ -1,19 +1,14 @@
 #include "tensor.h"
-#include <stdexcept>
-#include <cstring>
-#include <nrt/nrt.h>
-#include <memory>
-#include <vector>
-#include <string>
+#include <stdexcept>       // For runtime_error
 
 using std::unique_ptr;
 using std::move;
-using std::vector;
 using std::runtime_error;
 using std::static_cast;
 using std::string;
+using std::unordered_map;
 
-namespace neuron_rs::data {
+namespace neuronx_rs::data {
 
     unique_ptr<Tensor> Tensor::empty(nrt_tensor_info_t *info) {
         nrt_tensor_t *handle = nullptr;
@@ -104,4 +99,4 @@ namespace neuron_rs::data {
         }
         return unique_ptr<IoTensors>(new IoTensors(move(inputs), move(outputs)));
     }
-} // namespace neuron_rs::data
+} // namespace neuronx_rs::data

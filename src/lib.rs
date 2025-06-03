@@ -1,14 +1,18 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
+#[cxx::bridge]
+pub(crate) mod ffi {
+    #[namespace = "neuron_rs::model"]
+    unsafe extern "C++" {
+        include!("neuronx-rust/cxx/include/model.h");
+        type Model;
+        fn load(path: &str, start_nc: i32. nc_count: i32) -> UniquePtr<Model>;
+        fn bind_slice(self: Pin<&mut Model>, usage: u32, buffer: &mut [u8]) -> u32;
+        fn execute(self: self: Pin<&mut Model>);
+    }
+    #[namespace = "neuron_rs::runtime"]
+    unsafe extern "C++" {
+        include!("neuronx-rust/cxx/include/runtime.h");
+        type Runtime;
+        fn neuronx_init() -> u32;
+        fn neuronx_close() -> u32;
     }
 }

@@ -1,19 +1,18 @@
 #include "model.h"
-#include "tensor.h"
-#include <stdexcept>
-#include <unordered_map>
-#include <string>
-#include <fcntl.h>
+#include <stdexcept>       // For runtime_error
+#include <fcntl.h>         // For open, O_RDONLY
+#include <sys/mman.h>      // For mmap, munmap
+#include <sys/stat.h>      // For fstat
+#include <unistd.h>        // For close
 
 using std::unique_ptr;
 using std::runtime_error;
 using std::static_cast;
 using std::move;
-using std::unordered_map;
 using std::string;
-using neuron_rs::data::IoTensors;
+using neuronx_rs::data::IoTensors;
 
-namespace neuron_rs::model {
+namespace neuronx_rs::model {
 
     // RAII wrapper for mmap
     struct ModelMappedMemory {
@@ -88,13 +87,17 @@ namespace neuron_rs::model {
     }
 
     // Bind buffer to model i/o tensor to the model
-    uint32_t Model::bind(const string &name, nrt_tensor_usage_t usage, void *buffer) {
+    uint32_t Model::bind(const string &name, uint32_t usage, void *buffer) {
+        nrt_tensor_usage_t usage_selector = static_cast<nrt_tensor_usage_t>(usage);
         NRT_STATUS status = NRT_FAILURE;
         Tensor* tensor;
-        if (usage == NRT_TENSOR_USAGE_INPUT) {
+        if (usage_selector == NRT_TENSOR_USAGE_INPUT) {
             tensor = _io_tensors->inputs()->get_tensor(name);
-        } else {
+        } else if (usage_selector == NRT_TENSOR_USAGE_OUTPUT) {
             tensor = _io_tensors->outputs()->get_tensor(name);
+        }
+        else {
+            return static_cast<uint32_t>(NRT_INVALID);
         }
         if (!tensor) {
             return static_cast<uint32_t>(NRT_INVALID);

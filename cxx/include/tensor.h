@@ -1,20 +1,14 @@
 #pragma once
 
-#include <nrt/nrt.h>
-#include <memory>
-#include <vector>
-#include <unordered_map>
-#include <cstdint>
-#include <string>
-#include <stdexcept>
-
-using std::unique_ptr;
-using std::move;
-using std::string;
-using std::unordered_map;
+#include <nrt/nrt.h>       // For NRT types and functions
+#include <cstdint>         // For uint32_t
+#include <memory>          // For unique_ptr
+#include <string>          // For string
+#include <unordered_map>   // For unordered_map
+#include <stdexcept>       // For runtime_error
 
 
-namespace neuron_rs::data {
+namespace neuronx_rs::data {
 
     class Tensor {
         public:
