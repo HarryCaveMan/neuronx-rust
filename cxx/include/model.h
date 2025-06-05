@@ -9,14 +9,20 @@
 
 namespace neuronx_rs::model {
 
+    struct ModelResult {
+        unique_ptr<Model> value;
+        uint32_t status;
+        bool success() const { return status == static_cast<uint32_t>(NRT_SUCCESS); }
+    };
+
     class Model {
         public:
-            static unique_ptr<Model> from_neff_file(
+            static ModelResult from_neff_file(
                 const std::string &path,
                 int32_t start_nc = -1,
                 int32_t nc_count = -1
             );            
-            static unique_ptr<Model> from_neff_buffer(
+            static ModelResult from_neff_buffer(
                 const void *data,
                 size_t size,
                 int32_t start_nc = -1,
@@ -26,14 +32,14 @@ namespace neuronx_rs::model {
             uint32_t bind(const string &name, uint32_t usage, void *buffer);
 
             //rust ffi exposed methods
-            static unique_ptr<Model> load(
+            static ModelResult load(
                 const rust::Str path,
                 int32_t start_nc = -1,
                 int32_t nc_count = -1
             ) {
                 return from_neff_file(path, start_nc, nc_count);
             }            
-            uint32_t bind_slice(const string &name, uint32_t usage,rust::Slice<uint32_t> slice) {
+            uint32_t bind_slice(const string &name, uint32_t usage, rust::Slice<uint8_t> slice) {
                 return bind(name, usage, static_cast<void*>(slice.data()));
             }
             uint32_t execute();

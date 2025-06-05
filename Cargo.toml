@@ -6,3 +6,8 @@ edition = "2024"
 [dependencies]
 enum_primitive = "0.1.1"
 num-traits = "0.2.19"
+cxx = "1.0"
+thiserror = "0.1"
+
+[build-dependencies]
+cxx-build = "1.0"

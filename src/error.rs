@@ -43,25 +43,17 @@ enum_from_primitive! {
     }
 }
 
-impl From<NrtError> for u16 {
+impl From<NrtError> for u32 {
     fn from(error: NrtError) -> Self {
-        error as u16
+        error as u32
     }
 }
 
-impl From<u16> for NrtError {
-    fn from(code: u16) -> Self {
-        NrtError::from_u16(code as u16).unwrap_or(NrtError::NRT_FAILURE)
+impl From<u32> for NrtError {
+    fn from(code: u32) -> Self {
+        NrtError::from_u32(code as u32).unwrap_or(NrtError::NRT_FAILURE)
     }
 }
 
 pub type NrtResult<T> = Result<T, NrtError>;
 
-impl From<u16,T> for NrtResult<T> {
-    fn from(status: u16,result:T) -> Self {
-        if status == 0 {
-            return Ok(result);
-        }
-        Err(NrtError::from(code))
-    }
-}
