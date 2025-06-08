@@ -1,36 +1,52 @@
 #pragma once
 
-#include <nrt/nrt.h>       // For NRT types and functions
-#include <cstdint>         // For uint32_t
-#include <memory>          // For unique_ptr
-#include <string>          // For string
-#include <unordered_map>   // For unordered_map
-#include <stdexcept>       // For runtime_error
+#include <nrt/nrt.h>              // nrt_tensor_allocate_empty,nrt_tensor_free,nrt_tensor_attach_buffer
+                                  // nrt_allocate_tensor_set,nrt_destroy_tensor_set
+#include <nrt/nrt_experimental.h> // nrt_tensor_info_t,nrt_tensor_info_array_t,nrt_tensor_t,nrt_tensor_set_t
+#include <cstdint>                // uint32_t
+#include <memory>                 // unique_ptr
+#include <string>                 // string
+#include <unordered_map>          // unordered_map
+#include "rust/cxx.h"             // rust::Slice
 
+using std::string;
+using std::unique_ptr;
+using std::unordered_map;
+using std::move;
 
 namespace neuronx_rs::data {
 
+    struct TensorResult {
+        unique_ptr<Tensor> value;
+        uint32_t status;
+        bool success() const { return status == static_cast<uint32_t>(NRT_SUCCESS); }
+    };
+    struct TensorSetResult {
+        unique_ptr<TensorSet> value;
+        uint32_t status;
+        bool success() const { return status == static_cast<uint32_t>(NRT_SUCCESS); }
+    };
+    struct IoTensorsResult {
+        unique_ptr<IoTensors> value;
+        uint32_t status;
+        bool success() const { return status == static_cast<uint32_t>(NRT_SUCCESS); }
+    };
+
     class Tensor {
         public:
-            static unique_ptr<Tensor> empty(nrt_tensor_info_t *info);
+            static TensorResult empty(nrt_tensor_info_t *info);
             const string& name() const { return _name; }
-            nrt_tensor_t* handle() const { return _handle.get(); }
+            nrt_tensor_t* handle() const {return _handle.get();}
             size_t size() const { return _size; }
-            const uint32_t* shape() const {
-                if (!_shape) {
-                    throw std::runtime_error("Tensor shape is not initialized or has been invalidated");
-                }
-                return _shape.get();
-            }
+            const uint32_t* shape() const {return _shape.get();}
             uint32_t ndim() const { return _ndim; }
             nrt_dtype_t dtype() const { return _dtype; }
-            uint32_t attach_buffer(void *buffer);
-            
+            uint32_t attach_buffer(void *buffer);            
             
         private:
             struct TensorHandleDestructor {
                 void operator()(nrt_tensor_t *handle) const {
-                    if (handle) nrt_free_tensor(&handle);
+                    if (handle) nrt_tensor_free(&handle);
                 }
             };
 
@@ -54,15 +70,15 @@ namespace neuronx_rs::data {
 
     class TensorSet {
         public:
-            static unique_ptr<TensorSet> empty();
-            static unique_ptr<TensorSet> empty_from_info_array(nrt_tensor_info_array_t *info_array);
+            TensorSetResult empty();
+            TensorSetResult empty_from_info_array(nrt_tensor_info_array_t *info_array);
             nrt_tensor_set_t* handle() const { return _handle.get(); }
             size_t size() const { return _size; }
             Tensor* get_tensor(const string &name) const {
                 auto it = _tensors.find(name);
                 return (it != _tensors.end()) ? it->second.get() : nullptr;
             }
-            NRT_STATUS add(unique_ptr<Tensor> tensor);
+            uint32_t add(unique_ptr<Tensor> tensor);
         private:
             struct TensorSetHandleDestructor {
                 void operator()(nrt_tensor_set_t *handle) const {
@@ -83,9 +99,14 @@ namespace neuronx_rs::data {
 
     class IoTensors {
         public:
-            static unique_ptr<IoTensors> empty_from_info_array(nrt_tensor_info_array_t *info_array);
+            static IoTensorsResult empty_from_info_array(nrt_tensor_info_array_t *info_array);
             TensorSet* inputs() const { return _inputs.get(); }
             TensorSet* outputs() const { return _outputs.get(); }
+            uint32_t bind(const string &name, uint32_t usage, void *buffer);
+            // Rust FFI exposed methods
+            uint32_t bind_slice(const string &name, uint32_t usage, rust::Slice<uint8_t> slice) {
+                return bind(name, usage, static_cast<void*>(slice.data()));
+            }
 
         private:
             IoTensors(unique_ptr<TensorSet> inputs, unique_ptr<TensorSet> outputs)

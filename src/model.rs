@@ -7,6 +7,11 @@ use std::ffi::c_void;
 use std::pin::Pin;
 use std::sync::Arc;
 
+pub enum TensorUsage {
+    NRT_TENSOR_USAGE_INPUT = 0,
+    NRT_TENSOR_USAGE_OUTPUT = 1
+}
+
 pub struct Model {
     inner: UniquePtr<ffi::Model>,
 }
@@ -21,7 +26,7 @@ impl Model {
         }
     }
 
-    pub unsafe fn bind(
+    pub fn bind(
         &mut self,
         name: &str,
         usage: u32,
@@ -39,9 +44,8 @@ impl Model {
         &mut self,
         name: &str,
         usage: u32,
-        buffer: &mut [u8],
-    ) -> NrtResult<()> {
-    
+        buffer: &mut [u8]
+    ) -> NrtResult<()> {    
         let status: u32 = self.inner.pin_mut().bind_slice(name, usage, buffer);
         if status == 0 {
             Ok(())
@@ -50,7 +54,13 @@ impl Model {
         }
     }
 
-    pub fn execute(&mut self) -> NrtResult<()> {
+    pub fn execute(&mut self,inputs: &[(String,&[u8])],outputs: &[(String,&mut [u8])]) -> NrtResult<()> {
+        for (name, buffer) in inputs {
+            self.bind_slice(name, TensorUsage::NRT_TENSOR_USAGE_INPUT as u32, buffer)?;
+        }
+        for (name, buffer) in outputs {
+            self.bind_slice(name, TensorUsage::NRT_TENSOR_USAGE_OUTPUT as u32, buffer)?;
+        }
         let status: u32 = self.inner.pin_mut().execute();
         if status == 0 {
             Ok(())

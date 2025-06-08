@@ -1,19 +1,15 @@
 #include "model.h"
-#include <stdexcept>       // For runtime_error
 #include <fcntl.h>         // For open, O_RDONLY
 #include <sys/mman.h>      // For mmap, munmap
 #include <sys/stat.h>      // For fstat
 #include <unistd.h>        // For close
 
 using std::unique_ptr;
-using std::runtime_error;
 using std::static_cast;
 using std::move;
 using std::string;
-using neuronx_rs::data::IoTensors;
 
 namespace neuronx_rs::model {
-
     // RAII wrapper for mmap
     struct ModelMappedMemory {
         static uint32_t SUCCESS{0};
@@ -82,39 +78,29 @@ namespace neuronx_rs::model {
         unique_ptr<nrt_model_t, ModelHandleDestructor> handle{raw_handle};
         nrt_tensor_info_array_t *tensor_info{nullptr};
         status = nrt_get_tensor_info_array(handle.get(),&tensor_info);
-        unique_ptr<IoTensors> io_tensors{IoTensors::empty_from_info_array(tensor_info)};
         return ModelResult{
-            unique_ptr<Model>(new Model(move(handle),move(io_tensors))),
+            unique_ptr<Model>(new Model(move(handle))),
             static_cast<uint32_t>(status)
         };
     }
 
-    // Bind buffer to model i/o tensor to the model
-    uint32_t Model::bind(const string &name, uint32_t usage, void *buffer) {
-        nrt_tensor_usage_t usage_selector{static_cast<nrt_tensor_usage_t>(usage)};
-        NRT_STATUS status{NRT_FAILURE};
-        Tensor* tensor;
-        if (usage_selector == NRT_TENSOR_USAGE_INPUT) {
-            tensor = _io_tensors->inputs()->get_tensor(name);
-        } else if (usage_selector == NRT_TENSOR_USAGE_OUTPUT) {
-            tensor = _io_tensors->outputs()->get_tensor(name);
+    // Create IoTensors from model's tensor info
+    IoTensorsResult Model::get_new_io_tensors() {
+        nrt_tensor_info_array_t *tensor_info{nullptr};
+        NRT_STATUS status{nrt_get_tensor_info_array(_handle.get(), &tensor_info)};
+        if (status != NRT_SUCCESS) {
+            return IoTensorsResult{nullptr, static_cast<uint32_t>(status)};
         }
-        else {
-            return static_cast<uint32_t>(NRT_INVALID);
-        }
-        if (!tensor) {
-            return static_cast<uint32_t>(NRT_INVALID);
-        }
-        status = tensor->attach_buffer(buffer);      
-        return static_cast<uint32_t>(status);
+        IoTensorsResult io_tensors_result{IoTensors::empty_from_info_array(tensor_info)};
+        return io_tensors_result;
     }
 
     // Execute inference
-    uint32_t Model::execute() {
+    uint32_t Model::execute(IoTensors *io_tensors) {
         return static_cast<uint32_t>(nrt_execute(
             _handle.get(),
-            _io_tensors->inputs()->handle(),
-            _io_tensors->outputs()->handle()
+            io_tensors->inputs()->handle(),
+            io_tensors->outputs()->handle()
         ));
     }
 

@@ -2,14 +2,11 @@
 
 #include <nrt/nrt.h>
 #include <cstdint>  // For uint32_t
-#include <stdexcept>  // For std::runtime_error
 #include <string>  // For std::string
 #include <memory>  // For std::unique_ptr
-#include "rust/cxx.h"  // For rust::Str, rust::Slice
 
 using std::static_cast;
 using std::string;
-using std::runtime_error;
 using std::unique_ptr;
 
 namespace neuronx_rs::runtime {

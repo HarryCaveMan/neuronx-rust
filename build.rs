@@ -16,7 +16,6 @@ fn find_dir(
                     return Some(path);
                 }
             }
-
             None
         }
     }

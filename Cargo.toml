@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+tokio = "1.45.1"
 enum_primitive = "0.1.1"
 num-traits = "0.2.19"
 cxx = "1.0"
