@@ -49,6 +49,11 @@ namespace neuronx_rs::model {
             uint32_t execute(IoTensors *io_tensors);
 
         private:
+            struct ModelTensorInfoDestructor {
+                void operator()(nrt_tensor_info_array_t *info) const {
+                    if (info) nrt_free_model_tensor_info(info);
+                }
+            };
             struct ModelHandleDestructor {
                 void operator()(nrt_model_t *handle) const {
                     if (handle) nrt_unload(handle);
@@ -56,10 +61,11 @@ namespace neuronx_rs::model {
             };
 
             Model(
-                unique_ptr<nrt_model_t,ModelHandleDestructor> handle
-            )
-            : _handle{move(handle)} {}
+                unique_ptr<nrt_model_t,ModelHandleDestructor> handle,
+                unique_ptr<nrt_tensor_info_array_t, ModelTensorInfoDestructor> tensor_info
+            ) : _handle(move(handle)), _tensor_info(move(tensor_info)) {}
 
             unique_ptr<nrt_model_t,ModelHandleDestructor> _handle;
+            unique_ptr<nrt_tensor_info_array_t, ModelTensorInfoDestructor> _tensor_info;
     };
 }

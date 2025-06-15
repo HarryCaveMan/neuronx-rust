@@ -41,7 +41,6 @@ namespace neuronx_rs::model {
             }
         }
     };
-
     // Factory method - load from file
     ModelResult Model::from_neff_file(
         const string& path,
@@ -76,23 +75,28 @@ namespace neuronx_rs::model {
             )
         };
         unique_ptr<nrt_model_t, ModelHandleDestructor> handle{raw_handle};
-        nrt_tensor_info_array_t *tensor_info{nullptr};
-        status = nrt_get_tensor_info_array(handle.get(),&tensor_info);
+        nrt_tensor_info_array_t *raw_tensor_info{nullptr};
+        status = nrt_get_tensor_info_array(handle.get(),&raw_tensor_info);
+        unique_ptr<nrt_tensor_info_array_t> tensor_info { raw_tensor_info ? 
+            unique_ptr<nrt_tensor_info_array_t, ModelTensorInfoDestructor>(raw_tensor_info) 
+            : 
+            nullptr
+        };
         return ModelResult{
-            unique_ptr<Model>(new Model(move(handle))),
+            unique_ptr<Model>(new Model(move(handle),move(tensor_info))),
             static_cast<uint32_t>(status)
         };
     }
 
     // Create IoTensors from model's tensor info
     IoTensorsResult Model::get_new_io_tensors() {
-        nrt_tensor_info_array_t *tensor_info{nullptr};
-        NRT_STATUS status{nrt_get_tensor_info_array(_handle.get(), &tensor_info)};
-        if (status != NRT_SUCCESS) {
-            return IoTensorsResult{nullptr, static_cast<uint32_t>(status)};
-        }
-        IoTensorsResult io_tensors_result{IoTensors::empty_from_info_array(tensor_info)};
-        return io_tensors_result;
+        nrt_tensor_info_array_t *info_array{_tensor_info.get()};
+        IoTensorsResult result{ info_array ?
+            IoTensors::empty_from_info_array(info_array)
+            :
+            IoTensorsResult{nullptr, static_cast<uint32_t>(NRT_INVALID_HANDLE)}
+        };
+        return result;
     }
 
     // Execute inference

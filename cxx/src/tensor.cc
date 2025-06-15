@@ -120,16 +120,41 @@ namespace neuronx_rs::data {
             static_cast<uint32_t>(NRT_SUCCESS)
         };
     }
-
-    uint32_t IoTensors::bind(const string &name, uint32_t usage, void *buffer) {
+    //getters for io tensor info
+    unique_ptr<TensorInfo[]> IoTensors::get_input_tensor_info() const {
+        unique_ptr<TensorInfo[]> info{new TensorInfo[_inputs->size()]};
+        size_t i{0};
+        for (const auto &pair : _inputs->_tensors) {
+            TensorInfoResult result{TensorInfo::from_tensor(pair.second.get())};
+            if (!result.success()) return nullptr;
+            info[i++] = move(result.value);
+        }
+        return info;
+    }
+    unique_ptr<TensorInfo[]> IoTensors::get_output_tensor_info() const {
+        unique_ptr<TensorInfo[]> info{new TensorInfo[_outputs->size()]};
+        size_t i{0};
+        for (const auto &pair : _outputs->_tensors) {
+            TensorInfoResult result{TensorInfo::from_tensor(pair.second.get())};
+            if (!result.success()) return nullptr;
+            info[i++] = move(result.value);
+        }
+        return info;
+    }
+    // Performs the unsafe buffer mutation but only after lots of safety checks
+    uint32_t IoTensors::bind(const string &name, uint32_t usage, void *buffer, size_t size) {
         nrt_tensor_usage_t usage_selector{static_cast<nrt_tensor_usage_t>(usage)};
         NRT_STATUS status{NRT_FAILURE};
         if (usage_selector == NRT_TENSOR_USAGE_INPUT) {
             Tensor * tensor{_inputs->get_tensor(name)};
-            return tensor ? tensor->attach_buffer(buffer) : static_cast<uint32_t>(NRT_INVALID_HANDLE);
+            if (!tensor) {return static_cast<uint32_t>(NRT_INVALID_HANDLE);}
+            if (size != tensor->size()) {return static_cast<uint32_t>(NRT_INVALID);}
+            return tensor->attach_buffer(buffer);
         } else if (usage_selector == NRT_TENSOR_USAGE_OUTPUT) {
             Tensor * tensor{_outputs->get_tensor(name)};
-            return tensor ? tensor->attach_buffer(buffer) : static_cast<uint32_t>(NRT_INVALID_HANDLE);
+            if (!tensor) {return static_cast<uint32_t>(NRT_INVALID_HANDLE);}
+            if (size != tensor->size()) {return static_cast<uint32_t>(NRT_INVALID);}
+            return tensor->attach_buffer(buffer);
         }
         else {
             return static_cast<uint32_t>(NRT_INVALID);
