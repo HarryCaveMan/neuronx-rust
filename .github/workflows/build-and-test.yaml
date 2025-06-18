@@ -44,4 +44,4 @@ jobs:
           -v $(pwd):/opt/neuronx-rust \
           -w /opt/neuronx-rust \
           -e RUSTFLAGS=-Awarnings \
-        neuronx-rust-test cargo test -- --nocapture
+        neuronx-rust-test
