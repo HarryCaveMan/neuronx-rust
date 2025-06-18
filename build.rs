@@ -50,6 +50,7 @@ fn main() {
         .clang_arg("-x")
         .clang_arg("c++")
         .clang_arg("-std=c++20")
+        .generate_comments(false)
         .header(nrt_include_dir.join("nrt/nrt_experimental.h").to_string_lossy())
         .header(nrt_include_dir.join("nrt/nrt.h").to_string_lossy())
         .header(nrt_include_dir.join("nrt/nrt_status.h").to_string_lossy())
