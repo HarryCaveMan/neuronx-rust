@@ -89,9 +89,25 @@ mod tests {
     use crate::error::{
         NrtError,
         NrtResult
-    };
+    };    
 
-    #[cfg_attr(not(feature = "hardware_tests"), ignore)]
+    #[test]
+    fn test_get_version() {
+        match get_version() {
+            Ok(version) => println!("Neuron runtime version: {:?}", version),
+            Err(err) => panic!("Failed to get version: {:?}", err)
+        }
+    }
+
+    #[test]
+    fn test_get_visible_nc_count() {
+        match get_visible_nc_count() {
+            Ok(count) => println!("Visible core count: {:?}", count),
+            Err(err) => panic!("Failed to get visible core count: {:?}", err)
+        }
+    }
+
+    #[cfg(feature = "hardware_tests")]
     #[test]
     fn test_init() {
         match init() {
@@ -103,15 +119,7 @@ mod tests {
         }
     }
 
-    #[test]
-    fn test_get_version() {
-        match get_version() {
-            Ok(version) => println!("Neuron runtime version: {:?}", version),
-            Err(err) => panic!("Failed to get version: {:?}", err)
-        }
-    }
-
-    #[cfg_attr(not(feature = "hardware_tests"), ignore)]
+    #[cfg(feature = "hardware_tests")]
     #[test]
     fn test_get_nc_count() {
         match get_nc_count() {
@@ -120,20 +128,12 @@ mod tests {
         }
     }
 
-    #[cfg_attr(not(feature = "hardware_tests"), ignore)]
+    #[cfg(feature = "hardware_tests")]
     #[test]
     fn test_get_total_vnc_count() {
         match get_total_vnc_count() {
             Ok(count) => println!("Total virtual core count: {:?}", count),
             Err(err) => panic!("Failed to get total virtual core count: {:?}", err)
-        }
-    }
-
-    #[test]
-    fn test_get_visible_nc_count() {
-        match get_visible_nc_count() {
-            Ok(count) => println!("Visible core count: {:?}", count),
-            Err(err) => panic!("Failed to get visible core count: {:?}", err)
         }
     }
 }
