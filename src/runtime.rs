@@ -94,10 +94,10 @@ mod tests {
     #[test]
     fn test_init() {
         match init() {
-            Ok(_) => Ok(close()),
+            Ok(_) => close(),
             Err(err) => {
                 close();
-                Err(format!("Failed to initialize runtime: {:?}", err));
+                panic!("Failed to initialize runtime: {:?}", err);
             }
         }
     }
@@ -105,7 +105,7 @@ mod tests {
     #[test]
     fn test_get_version() {
         match get_version() {
-            Ok(version) => Okprintln!("Neuron runtime version: {:?}", version),
+            Ok(version) => println!("Neuron runtime version: {:?}", version),
             Err(err) => panic!("Failed to get version: {:?}", err)
         }
     }
