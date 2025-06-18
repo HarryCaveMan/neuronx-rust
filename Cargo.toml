@@ -5,14 +5,16 @@ edition = "2024"
 
 [dependencies]
 tokio = "1.45.1"
+thiserror = "2.0.12"
 enum_primitive = "0.1.1"
 num-traits = "0.2.19"
-cxx = "1.0"
-thiserror = "0.1"
+anyhow = "1.0.98"
+memmap2 = "0.9.5"
 ndarray = {version="0.16.1",optional=true}
 
 [build-dependencies]
-cxx-build = "1.0"
+bindgen = "0.72.0"
 
 [features]
+ndl = []
 service = ["dep:ndarray"]

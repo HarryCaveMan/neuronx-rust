@@ -28,6 +28,9 @@ typedef enum {
     NRT_LOAD_NOT_ENOUGH_NC = 9,             // Failed to allocate enough NCs for loading a NEFF
     NRT_UNSUPPORTED_NEFF_VERSION = 10,      // Unsupported version of NEFF
 
+    // DO NOT USE - keep for backward compat
+    NRT_FAIL_HOST_MEM_ALLOC = 11,           // failed to allocate host memory
+
     // Unique retcodes to help the caller identify when nrt apis are called outside the scope of nrt_init() and nrt_close()
     NRT_UNINITIALIZED = 13,
     NRT_CLOSED = 14,
@@ -37,8 +40,19 @@ typedef enum {
     NRT_EXEC_COMPLETED_WITH_ERR = 1004,     // execution was completed with other errors,
                                             // either logical - event double clear, or physical - parity error
     NRT_EXEC_NC_BUSY = 1005,                // the neuron core is locked (in use) by another model/process
+    NRT_EXEC_OOB = 1006,                    // one or more indirect memcopies and/or embedding updates are out of bound
     NRT_COLL_PENDING = 1100,                // collective operation is still pending
+
+    // classify different types of execution hangs/timeouts. For unknown/generic hang, use NRT_TIMEOUT.
+    NRT_EXEC_HW_ERR_COLLECTIVES = 1200,     // Stuck in collectives op (missing notification(s)). Possibly caused by a hardware error on another worker.
+    NRT_EXEC_HW_ERR_HBM_UE      = 1201,     // An HBM encountered an uncorrectable error and produced incorrect results.
+    NRT_EXEC_HW_ERR_NC_UE       = 1202,     // An on-chip memory of Neuron Core encountered a parity error and produced incorrect results.
+    NRT_EXEC_HW_ERR_DMA_ABORT   = 1203,     // A DMA engine encountered an unrecoverable error.
+
+    NRT_EXEC_SW_NQ_OVERFLOW     = 1204
 } NRT_STATUS;
+
+const char *nrt_get_status_as_str(NRT_STATUS status);
 
 #ifdef __cplusplus
 }
