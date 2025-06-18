@@ -10,6 +10,6 @@ ENV LIBNRT_LIB_PATH=/opt/aws/neuron/lib
 ENV PATH="/root/.cargo/bin:${PATH}"
 ENV RUSTFLAGS=-Awarnings
 
-ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["/bin/bash","-c"]
 
 CMD ["cargo", "test", "--", "--nocapture"]
