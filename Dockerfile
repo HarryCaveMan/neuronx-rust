@@ -11,4 +11,4 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 ENV RUSTFLAGS=-Awarnings
 ENV RUSTDOCFLAGS=-Awarnings
 
-ENTRYPOINT ["cargo","test","--","--nocapture"]
+ENTRYPOINT ["cargo","test","--lib","--bins","--","--nocapture"]
