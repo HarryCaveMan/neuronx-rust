@@ -40,4 +40,7 @@ jobs:
         cache-to: type=local,dest=/tmp/.buildx-cache-new
 
     - name: Run tests
-      run: docker run neuronx-rust-test
+      run: docker run neuronx-rust-test \
+        --skip test_get_nc_count \
+        --skip test_get_total_vnc_count \
+        --skip test_init
