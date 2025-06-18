@@ -71,16 +71,8 @@ fn main() {
     bindings
         .write_to_file(out_path.join("ffi.rs"))
         .expect("Couldn't write bindings!");
-
-    // Rebuild if the libs change
-    println!("cargo:rerun-if-changed={}", nrt_lib_dir.join("libnrt.so").display());
-    //rebuild if the headers change
-    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nrt_experimental.h").display());
-    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nrt.h").display());
-    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nrt_status.h").display());
-    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nrt_profile.h").display());
-    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nec.h").display());
-    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nds/neuron_ds.h").display());
+    //rebuild if sources change
+    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("src").display());
     // Rebuild if the build script itself changes
     println!("cargo:rerun-if-changed=build.rs");
 }
