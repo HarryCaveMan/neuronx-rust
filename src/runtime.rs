@@ -91,6 +91,7 @@ mod tests {
         NrtResult
     };
 
+    #[cfg_attr(not(feature = "hardware_tests"), ignore)]
     #[test]
     fn test_init() {
         match init() {
@@ -110,6 +111,7 @@ mod tests {
         }
     }
 
+    #[cfg_attr(not(feature = "hardware_tests"), ignore)]
     #[test]
     fn test_get_nc_count() {
         match get_nc_count() {
@@ -118,6 +120,7 @@ mod tests {
         }
     }
 
+    #[cfg_attr(not(feature = "hardware_tests"), ignore)]
     #[test]
     fn test_get_total_vnc_count() {
         match get_total_vnc_count() {

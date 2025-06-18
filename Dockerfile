@@ -1,4 +1,4 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023
+FROM --platform=linux/amd64 public.ecr.aws/amazonlinux/amazonlinux:2023
 
 COPY al2023build.sh build.sh
 
@@ -9,5 +9,7 @@ ENV LIBNRT_INCLUDE_PATH=/opt/aws/neuron/include
 ENV LIBNRT_LIB_PATH=/opt/aws/neuron/lib
 ENV PATH="/root/.cargo/bin:${PATH}"
 ENV RUSTFLAGS=-Awarnings
+ENV RUSTDOCFLAGS=-Awarnings
 
-ENTRYPOINT ["/bin/bash"]
+# ENTRYPOINT ["/bin/bash"]
+ENTRYPOINT ["cargo","test","--","--nocapture"]
