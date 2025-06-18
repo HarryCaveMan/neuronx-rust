@@ -14,4 +14,4 @@ WORKDIR /opt/neuronx-rust
 
 COPY . .
 
-ENTRYPOINT ["cargo","test","--","nocapture"]
+ENTRYPOINT ["cargo","test","--","--nocapture"]
