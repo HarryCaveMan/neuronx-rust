@@ -1,4 +1,4 @@
-FROM public.ecr.aws/amazonlinux/amazonlinux:2023
+FROM --platform=linux/amd64 public.ecr.aws/amazonlinux/amazonlinux:2023
 
 COPY al2023build.sh build.sh
 
