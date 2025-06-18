@@ -1,8 +1,10 @@
+# cargo binary/build output dirs
 /target
-
-
-# Added by cargo
-#
-# already existing elements were commented out
-
-#/target
+## Do not push the bindgen ffi yet, 
+# I need to make sure no unlicensed AWS software is included under my MIT license
+# Bindgen will generate it on your AWS system from the SDK headers and libs
+ffi.rs
+# test results file
+results.txt
+# Rust's Cargo lock file
+Cargo.lock

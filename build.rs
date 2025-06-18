@@ -22,59 +22,65 @@ fn find_dir(
 }
 
 fn main() {
-    let nrt_include_dir = find_dir(
-        "LIBNRT_INCLUDE_PATH",
-        vec!["/opt/neuron/include", "/usr/local/neuron/include"],
-        "nrt/nrt.h",
-    ).expect("Could not find Neuron runtime include path");
 
-    let nrt_library_dir = find_dir(
+    // Find the library directory
+    let nrt_lib_dir = find_dir(
         "LIBNRT_LIB_PATH",
-        vec!["/usr/local/lib", "/usr/lib/x86_64-linux-gnu"],
+        vec!["/opt/aws/neuron/lib", "/usr/local/neuron/lib"],
         "libnrt.so",
     ).expect("Could not find Neuron runtime library path");
 
-    let include_files = vec![
-        "cxx/include/model.h",
-        "cxx/include/runtime.h",
-        "cxx/include/tensor.h"
-    ];
-    let cpp_files = vec![
-        "cxx/src/model.cc",
-        "cxx/src/tensor.cc"
-    ];
-    let rust_files = vec![
-        "src/lib.rs",
-    ];
+    // Tell cargo to link against nrt
+    println!("cargo:rustc-link-search={}", nrt_lib_dir.display());
+    println!("cargo:rustc-link-lib=nrt");
+    #[cfg(feature = "ndl")]
+    println!("cargo:rustc-link-lib=nds");
 
-    cxx_build::bridges(&rust_files)
-        .include(nrt_include_dir)
-        .include("cxx/include")
-        .files(&cpp_files)
-        .define("FMT_HEADER_ONLY", None)
-        .flag_if_supported("-std=c++20")
-        .compile("neuronx-rust-cxxbridge");
+    // In build.rs
+    println!("cargo:rustc-link-arg=-Wl,-rpath,{}", nrt_lib_dir.display());
 
-    println!("cargo:rustc-link-search={}", nrt_library_dir.to_string_lossy());
+    let nrt_include_dir = find_dir(
+        "LIBNRT_INCLUDE_PATH",
+        vec!["/opt/aws/neuron/include", "/usr/local/neuron/include"],
+        "cxx/include",
+    ).expect("Could not find Neuron runtime include path");
 
-    // Mutable in case I want to add more optional libraries later (IE libtorch, etc.)
-    let mut libraries = vec![
-        "nrt"
-    ];
+    let mut builder = bindgen::Builder::default()
+        .clang_arg(format!("-I{}", nrt_include_dir.display()))
+        .clang_arg("-x")
+        .clang_arg("c++")
+        .clang_arg("-std=c++20")
+        .header(nrt_include_dir.join("nrt/nrt_experimental.h").to_string_lossy())
+        .header(nrt_include_dir.join("nrt/nrt.h").to_string_lossy())
+        .header(nrt_include_dir.join("nrt/nrt_status.h").to_string_lossy())
+        .header(nrt_include_dir.join("nrt/nrt_profile.h").to_string_lossy())
+        .header(nrt_include_dir.join("nrt/nrt_version.h").to_string_lossy())
+        .header(nrt_include_dir.join("nrt/nec.h").to_string_lossy());
 
-    for library in libraries {
-        println!("cargo:rustc-link-lib={}", library);
+    if cfg!(feature = "ndl") {
+        builder = builder.header(nrt_include_dir.join("nrt/nds/neuron_ds.h").to_string_lossy());
     }
 
-    for file in include_files {
-        println!("cargo:rerun-if-changed={}", file);
-    }
+    let bindings = builder
+        .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))
+        .generate()
+        .expect("Unable to generate bindings");
 
-    for file in cpp_files {
-        println!("cargo:rerun-if-changed={}", file);
-    }
+    // Write the bindings to the $OUT_DIR/bindings.rs file.
+    let out_path = PathBuf::from("./src");
+    bindings
+        .write_to_file(out_path.join("ffi.rs"))
+        .expect("Couldn't write bindings!");
 
-    for file in rust_files {
-        println!("cargo:rerun-if-changed={}", file);
-    }
+    // Rebuild if the libs change
+    println!("cargo:rerun-if-changed={}", nrt_lib_dir.join("libnrt.so").display());
+    //rebuild if the headers change
+    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nrt_experimental.h").display());
+    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nrt.h").display());
+    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nrt_status.h").display());
+    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nrt_profile.h").display());
+    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nec.h").display());
+    println!("cargo:rerun-if-changed={}", nrt_include_dir.join("nrt/nds/neuron_ds.h").display());
+    // Rebuild if the build script itself changes
+    println!("cargo:rerun-if-changed=build.rs");
 }
