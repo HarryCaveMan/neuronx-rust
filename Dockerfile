@@ -8,5 +8,7 @@ ENV PATH="/opt/aws/neuron/bin:${PATH}"
 ENV LIBNRT_INCLUDE_PATH=/opt/aws/neuron/include
 ENV LIBNRT_LIB_PATH=/opt/aws/neuron/lib
 ENV PATH="/root/.cargo/bin:${PATH}"
+ENV RUSTFLAGS=-Awarnings
+ENV RUSTDOCFLAGS=-Awarnings
 
-ENTRYPOINT ["bash", "-c", "RUSTFLAGS=-Awarnings cargo test -- --nocapture"]
+ENTRYPOINT ["cargo","test","--","--nocapture"]
