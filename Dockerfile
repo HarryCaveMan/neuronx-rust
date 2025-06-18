@@ -10,8 +10,4 @@ ENV LIBNRT_LIB_PATH=/opt/aws/neuron/lib
 ENV PATH="/root/.cargo/bin:${PATH}"
 ENV RUSTFLAGS=-Awarnings
 
-WORKDIR /opt/neuronx-rust
-
-COPY . .
-
 ENTRYPOINT ["cargo","test","--","--nocapture"]
