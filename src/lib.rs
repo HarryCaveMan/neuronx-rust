@@ -9,3 +9,8 @@ pub (crate) mod data;
 pub mod error;
 pub mod model;
 pub mod runtime;
+
+#[cfg(feature = "tokenizer")]
+pub mod tokenizer;
+#[cfg(feature = "service")]
+pub mod service;
