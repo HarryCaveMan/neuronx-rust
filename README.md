@@ -1,2 +1,4 @@
 # neuronx-rust
-Safe, RAII-focused c++ wrapper and rust bindings for AWS Neuron Runtime (libnrt)
+Safe bindgen wrapper for AWS Neuron Runtime (libnrt)
+
+## Work in Progress
