@@ -40,7 +40,7 @@ pub fn init() -> NrtResult<()> {
             CString::new("").unwrap().as_ptr()
         )
     } as u32;
-    nrt_wrap_status!((),status)
+    nrt_result!((),status)
 }
 
 pub fn close() {
@@ -59,7 +59,7 @@ pub fn get_version() -> NrtResult<NrtVersionInfo> {
     let status = unsafe {
         ffi::nrt_get_version(&mut version,size_of::<ffi::nrt_version_t>())
     };
-    nrt_wrap_status!(NrtVersionInfo::from(version),status)
+    nrt_result!(NrtVersionInfo::from(version),status)
 }
 
 pub fn get_nc_count() -> NrtResult<u32> {
@@ -67,19 +67,19 @@ pub fn get_nc_count() -> NrtResult<u32> {
     let status = unsafe {
         ffi::nrt_get_total_nc_count(&mut count)
     };
-    nrt_wrap_status!(count,status)
+    nrt_result!(count,status)
 }
 
 pub fn get_total_vnc_count() -> NrtResult<u32> {
     let mut count: u32 = 0;
     let status = unsafe { ffi::nrt_get_total_vnc_count(&mut count) };
-    nrt_wrap_status!(count,status)
+    nrt_result!(count,status)
 }
 
 pub fn get_visible_nc_count() -> NrtResult<u32> {
     let mut count: u32 = 0;
     let status = unsafe { ffi::nrt_get_visible_nc_count(&mut count) };
-    nrt_wrap_status!(count,status)
+    nrt_result!(count,status)
 }
 
 
@@ -107,7 +107,7 @@ mod tests {
         }
     }
 
-    #[cfg(feature = "hardware_tests")]
+    #[cfg_attr(not(feature = "hardware_tests"), ignore)]
     #[test]
     fn test_init() {
         match init() {
@@ -119,7 +119,7 @@ mod tests {
         }
     }
 
-    #[cfg(feature = "hardware_tests")]
+    #[cfg_attr(not(feature = "hardware_tests"), ignore)]
     #[test]
     fn test_get_nc_count() {
         match get_nc_count() {
@@ -128,7 +128,7 @@ mod tests {
         }
     }
 
-    #[cfg(feature = "hardware_tests")]
+    #[cfg_attr(not(feature = "hardware_tests"), ignore)]
     #[test]
     fn test_get_total_vnc_count() {
         match get_total_vnc_count() {
