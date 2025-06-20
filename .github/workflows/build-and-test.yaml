@@ -41,4 +41,3 @@ jobs:
 
     - name: Run tests
       run: docker run -v $(pwd):/opt/neuronx-rust -w /opt/neuronx-rust neuronx-rust-test -c "cargo test -- --nocapture"
-#[cfg(feature = "hardware_tests")]
