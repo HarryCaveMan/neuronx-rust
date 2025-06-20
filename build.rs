@@ -23,20 +23,17 @@ fn find_dir(
 
 fn main() {
 
-    // Find the library directory
     let nrt_lib_dir = find_dir(
         "LIBNRT_LIB_PATH",
         vec!["/opt/aws/neuron/lib", "/usr/local/neuron/lib"],
         "libnrt.so",
     ).expect("Could not find Neuron runtime library path");
 
-    // Tell cargo to link against nrt
     println!("cargo:rustc-link-search={}", nrt_lib_dir.display());
     println!("cargo:rustc-link-lib=nrt");
+
     #[cfg(feature = "ndl")]
     println!("cargo:rustc-link-lib=nds");
-
-    // In build.rs
     println!("cargo:rustc-link-arg=-Wl,-rpath,{}", nrt_lib_dir.display());
 
     let nrt_include_dir = find_dir(
@@ -59,7 +56,13 @@ fn main() {
         .header(nrt_include_dir.join("nrt/nec.h").to_string_lossy());
 
     if cfg!(feature = "ndl") {
-        builder = builder.header(nrt_include_dir.join("nrt/nds/neuron_ds.h").to_string_lossy());
+        // This feature currently does not work due to the structure of the ndl headers
+        // I could do some copying to get them in the right location, but that would be a hack
+        // Because I don't know if there are any other libs I would need to link against
+        builder = builder
+            .header(nrt_include_dir.join("ndl/ndl.h").to_string_lossy())
+            .header(nrt_include_dir.join("ndl/neuron_driver_shared.h").to_string_lossy())
+            .header(nrt_include_dir.join("nrt/nds/neuron_ds.h").to_string_lossy());
     }
 
     let bindings = builder
@@ -67,13 +70,11 @@ fn main() {
         .generate()
         .expect("Unable to generate bindings");
 
-    // Write the bindings to the $OUT_DIR/bindings.rs file.
     let out_path = PathBuf::from("./src");
+    
     bindings
         .write_to_file(out_path.join("ffi.rs"))
         .expect("Couldn't write bindings!");
-    //rebuild if sources change
     println!("cargo:rerun-if-changed={}", nrt_include_dir.join("src").display());
-    // Rebuild if the build script itself changes
     println!("cargo:rerun-if-changed=build.rs");
 }

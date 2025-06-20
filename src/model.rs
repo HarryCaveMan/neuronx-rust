@@ -22,7 +22,7 @@ unsafe impl Sync for Model {}
 
 impl Model {
 
-    pub fn from_neff_file(path: PathBuf,start_vnc: i32,vnc_count: i32,model: *mut *mut ffi::nrt_model_t) -> NrtResult<Self> {
+    pub fn from_neff_file(path: PathBuf,start_vnc: i32,vnc_count: i32) -> NrtResult<Self> {
         let neff_buffer = MemMappedROBuffer::from_file(path)?;
         let mut handle: *mut ffi::nrt_model_t = std::ptr::null_mut();
         let status = unsafe {
