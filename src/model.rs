@@ -34,7 +34,7 @@ impl Model {
                 &mut handle
             )
         } as u32;
-        nrt_wrap_status!(Model{handle,neff_buffer},status)
+        nrt_result!(Model{handle,neff_buffer},status)
     }
 
     pub unsafe fn handle(&self) -> *mut ffi::nrt_model_t {self.handle}
@@ -48,7 +48,7 @@ impl Model {
                 } as u32;
                 self.handle = std::ptr::null_mut();
                 // The neff_buffer has its own RAII, only handle cleanup is needed by libnrt
-                nrt_wrap_status!((),status).expect("Failed to unload model");
+                nrt_result!((),status).expect("Failed to unload model");
             }
         }
     }

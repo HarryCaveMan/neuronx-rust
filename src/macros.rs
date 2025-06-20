@@ -1,4 +1,4 @@
-macro_rules! nrt_wrap_status {
+macro_rules! nrt_result {
     ($val:expr, $status:ident) => (
         if $status == 0 {
             Ok($val)
