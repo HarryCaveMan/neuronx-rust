@@ -7,7 +7,7 @@ edition = "2024"
 thiserror = "2.0.12"
 enum_primitive = "0.1.1"
 num-traits = "0.2.19"
-anyhow = "1.0.98"
+log = "0.4.27"
 memmap2 = "0.9.5"
 tokio = {version="1.45.1",optional=true}
 tokenizers = {version="0.21.1",optional=true}

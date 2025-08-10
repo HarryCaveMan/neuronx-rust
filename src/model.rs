@@ -4,6 +4,13 @@ use crate::error::{
     NrtError,
     NrtResult
 };
+use crate::tensor::{
+    TensorPlacement, 
+    TensorUsage,
+    TensorType,
+    TensorInfo
+    Tensor
+};
 use std::os::raw::{
     c_void,
     c_char,
@@ -36,6 +43,8 @@ impl Model {
         } as u32;
         nrt_result!(Model{handle,neff_buffer},status)
     }
+
+    
 
     pub unsafe fn handle(&self) -> *mut ffi::nrt_model_t {self.handle}
 }
