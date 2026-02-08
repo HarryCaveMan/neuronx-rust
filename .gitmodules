@@ -1,0 +1,3 @@
+[submodule "aws-neuron-sdk"]
+	path = aws-neuron-sdk
+	url = https://github.com/aws-neuron/aws-neuron-sdk.git

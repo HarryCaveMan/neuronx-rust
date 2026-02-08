@@ -38,8 +38,8 @@ fn main() {
 
     let nrt_include_dir = find_dir(
         "LIBNRT_INCLUDE_PATH",
-        vec!["/opt/aws/neuron/include", "/usr/local/neuron/include"],
-        "cxx/include",
+        vec!["aws-neuron-sdk/libnrt/src/include","/opt/aws/neuron/include", "/usr/local/neuron/include"],
+        "nrt/nrt.h",
     ).expect("Could not find Neuron runtime include path");
 
     let mut builder = bindgen::Builder::default()
@@ -50,9 +50,12 @@ fn main() {
         .generate_comments(false)
         .header(nrt_include_dir.join("nrt/nrt_experimental.h").to_string_lossy())
         .header(nrt_include_dir.join("nrt/nrt.h").to_string_lossy())
+        .header(nrt_include_dir.join("nrt/nrt_async.h").to_string_lossy())
+        .header(nrt_include_dir.join("nrt/nrt_async_sendrecv.h").to_string_lossy())
         .header(nrt_include_dir.join("nrt/nrt_status.h").to_string_lossy())
         .header(nrt_include_dir.join("nrt/nrt_profile.h").to_string_lossy())
         .header(nrt_include_dir.join("nrt/nrt_version.h").to_string_lossy())
+        .header(nrt_include_dir.join("nrt/nrt_sys_trace.h").to_string_lossy())
         .header(nrt_include_dir.join("nrt/nec.h").to_string_lossy());
 
     if cfg!(feature = "ndl") {
